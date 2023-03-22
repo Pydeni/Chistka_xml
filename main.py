@@ -163,7 +163,7 @@ for f in os.scandir(r'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Обща
 #     writer.sheets['Sheet1'].set_column(col_idx, col_idx, column_width)
 # writer.save()
 
-# print(f'Еще раз проходимся и удаляем из вч и рф, удалено {ydalit(vch,rf)}')
+
 
 # Для просто записи датафрейма в эксель, без обработки листов
 df.to_excel(r'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Данные из xml.xlsx', index= False)
