@@ -12,30 +12,64 @@ work_path = Path.cwd()
 
 path = Path(work_path, 'ВЧ.xlsx')
 path1 = Path(work_path, 'РФ.xlsx')
-
+path2 = Path(work_path, 'ОперУправление EGRN_VK_INCCA0001443872_ALS_OKS_SUB (ОКС по списку + правообладатель)-2476068.xlsx')
+path3 = Path(work_path, 'ФИО EGRN_VK_INCCA0001443872_ALS_OKS_SUB (ОКС по списку + правообладатель)-2476062.xlsx')
 vch = pd.read_excel(path)
 rf = pd.read_excel(path1)
+oper = pd.read_excel(path2)
+egrn = pd.read_excel(path3)
 
-# # Удаляем файлы, которые есть в ВЧ и РФ
-# def ydalit(vch,rf):
-#     count = 0
-#     spispok_xml = os.listdir(r'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Общая')
-#     for xml in spispok_xml:
-#         if xml.split()[3][:-4] in vch['Кад. № ОКС'].unique():
-#             os.remove(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Общая\{xml}')
-#             print(f'Удален {xml}')
-#             count += 1
-#     print(f"Закончили удалять из ВЧ, удалено {count}")
-#     spispok_xml = os.listdir(r'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Общая')
-#     for xml_1 in spispok_xml:
-#         if xml_1.split()[3][:-4] in rf['Кад. № ОКС'].unique():
-#             os.remove(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Общая\{xml_1}')
-#             count += 1
-#     return count
 
-# print(f'Всего удалено {ydalit(vch,rf)} файлов (из вч и рф)')
 
-# Создаем  скелет датафрейма
+# Удаляем файлы, которые есть в Оперуправление, ФИО ЕГРН, ВЧ и РФ
+def ydalit2(oper, egrn, vch, rf):
+    count = 0
+    count_1 = 0
+    count_2 = 0
+    count_3 = 0
+    spispok_papok = os.listdir(r'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники')
+    for papka in spispok_papok:
+        spispok_xml = os.listdir(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники\{papka}')
+        for xml in spispok_xml:
+            if xml.split()[3][:-4] in oper['Реестровый номер объекта'].unique():
+                os.remove(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники\{papka}\{xml}')
+                print(f'Удален {xml}')
+                count += 1
+    print(f"Закончили удалять из ОПЕР, удалено {count}")
+    spispok_papok = os.listdir(r'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники')
+    for papka_1 in spispok_papok:
+        spispok_xml_1 = os.listdir(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники\{papka_1}')
+        for xml_1 in spispok_xml_1:
+            if xml_1.split()[3][:-4] in egrn['Реестровый номер объекта'].unique():
+                os.remove(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники\{papka_1}\{xml_1}')
+                print(f'Удален {xml_1}')
+                count_1 += 1
+                count += 1
+    print(f"Закончили удалять из ФИОЕГРН, удалено {count_1}")
+    for papka_2 in spispok_papok:
+        spispok_xml_2 = os.listdir(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники\{papka_2}')
+        for xml_2 in spispok_xml_2:
+            if xml_2.split()[3][:-4] in vch['Кад. № ОКС'].unique():
+                os.remove(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники\{papka_2}\{xml_2}')
+                print(f'Удален {xml_2}')
+                count_2 += 1
+                count += 1
+    print(f"Закончили удалять из ВЧ, удалено {count_2}")
+    for papka_3 in spispok_papok:
+        spispok_xml_3 = os.listdir(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники\{papka_3}')
+        for xml_3 in spispok_xml_3:
+            if xml_3.split()[3][:-4] in rf['Кад. № ОКС'].unique():
+                os.remove(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники\{papka_3}\{xml_3}')
+                print(f'Удален {xml_3}')
+                count_3 += 1
+                count += 1
+    print(f"Закончили удалять из РФ, удалено {count_3}")
+
+    return count
+print(f'Всего удалено {ydalit2(oper, egrn, vch, rf)} из файлов (из ОПЕР и ФИОЕГРН)')
+
+
+# # Создаем  скелет датафрейма
 shapka = {'Кадастровый № ОКС':[],'Вид ОКС':[],'Назначение':[],'Адрес ОКС':[],'Площадь':[],'Вид права':[],'ФИО':[],'Номер рег. записи':[]}
 df = pd.DataFrame(shapka)
 
@@ -111,46 +145,58 @@ def data_from_xml(root):
     stroka['Номер рег. записи'] = '    '.join(reg_zap)
     return stroka
 
-# Читаем содержимое в папке
-for f in os.scandir(r'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Общая'):
-    print(f'В работе {f}')
-    tree = ET.parse(f)
-    root = tree.getroot()
-    proverka = False
-    #Удаляем хмл, если в ней больше 4 комнат и где в адрессе есть СНТ
-    adress = [i.text.split() for i in root.iter('readable_address')]
-    for text in adress:
-        for snt in text:
-            if snt == "СНТ" or snt == 'казарма':
-                os.remove(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Общая\{f.name}')
-                print(f'Удален файл {f.name}, тут был СНТ')
-                break
-        else:
-            if len([i for i in root.iter('room_record')]) > 4:
-                os.remove(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Общая\{f.name}')
-                print(f'Удален файл {f.name}, комнат больше 4')
-                proverka = True
-            if proverka == False:
-                # Удаляем координаты
-                for i in root[2]:
-                    if i.tag == "contours":
-                        root[2].remove(i)
-                for i in root:
-                    if i.tag == "restrict_records":
-                        root.remove(i)
-                # Удаляем личные данные
-                for elem in root.iter('individual'):
-                    for el in elem:
-                        if el.tag != 'surname' or el.tag != 'name' or el.tag != 'patronymic':
-                            delit(elem, sp)
-                df = df.append(data_from_xml(root), ignore_index=True)
-
-                # # # Перезаписываем xml
-                print(f'Перезаписан {f}')
-                tree.write(f, encoding='utf-8', xml_declaration=True)
 
 
 
+# Читаем содержимое в папке (для перезаписи xml,удаления ненужных и т.д)
+spispok_papok = os.listdir(r'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники')
+for papka in spispok_papok:
+    for f in os.scandir(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники\{papka}'):
+        print(f'В работе {f}')
+        tree = ET.parse(f)
+        root = tree.getroot()
+        proverka = False
+        #Удаляем хмл, если в ней больше 4 комнат и где в адрессе есть СНТ или слово "казарма"
+        adress = [i.text.split() for i in root.iter('readable_address')]
+        for text in adress:
+            for snt in text:
+                if snt == "СНТ" or snt == 'казарма' or snt == "снт":
+                    os.remove(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники\{papka}\{f.name}')
+                    print(f'Удален файл {f.name}, тут был СНТ')
+                    break
+            else:
+                if len([i for i in root.iter('room_record')]) > 4:
+                    os.remove(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники\{papka}\{f.name}')
+                    print(f'Удален файл {f.name}, комнат больше 4')
+                    proverka = True
+                if proverka == False:
+                    # Удаляем координаты
+                    for i in root[2]:
+                        if i.tag == "contours":
+                            root[2].remove(i)
+                    for i in root:
+                        if i.tag == "restrict_records":
+                            root.remove(i)
+                    # Удаляем личные данные
+                    for elem in root.iter('individual'):
+                        for el in elem:
+                            if el.tag != 'surname' or el.tag != 'name' or el.tag != 'patronymic':
+                                delit(elem, sp)
+                    df = df.append(data_from_xml(root), ignore_index=True)
+
+                    # # # Перезаписываем xml
+                    print(f'Перезаписан {f}')
+                    tree.write(f, encoding='utf-8', xml_declaration=True)
+
+
+# # Если просто нужно пробежаться по всем файлам и записать их в эксель (функция выше уже записывает в эксель)
+# for papka in os.scandir(r'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники'):
+#     spispok_xml = os.listdir(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники\{papka.name}')
+#     for xml in spispok_xml:
+#         print(f'В работе {xml}')
+#         tree = ET.parse(fr'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Котельники\{papka.name}\{xml}')
+#         root = tree.getroot()
+#         df = df.append(data_from_xml(root), ignore_index=True)
 
 # Обработка книги (ExcelWriter - класс для записи объектов DataFrame в листы Excel). файл эксель создавать не надо, достаточно датафрейма.
 # файл создастся сам, когда создаем экземпляр класса writer. Как будет называеться файл и его путь, указать при создание экземпляра writer
@@ -164,6 +210,6 @@ for f in os.scandir(r'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Обща
 # writer.save()
 
 
-
+#
 # Для просто записи датафрейма в эксель, без обработки листов
 df.to_excel(r'C:\Users\denis.osipov\PycharmProjects\Chistka_xml\Данные из xml.xlsx', index= False)
